@@ -36,6 +36,7 @@ export interface Load {
 }
 
 export interface ChargerUsed {
+  order: number;
   source: string;
   external_id: string;
   name: string | null;
@@ -46,6 +47,8 @@ export interface ChargerUsed {
   num_dc_fast_ports: number | null;
   connector_types: string[];
   along_route_mi: number;
+  energy_added_kwh: number;
+  charge_minutes: number;
   picked: boolean;
 }
 
@@ -59,9 +62,11 @@ export interface Assessment {
   energy_required_kwh: number;
   usable_energy_for_trip_kwh: number;
   charging_required: boolean;
+  num_charge_stops: number;
   energy_to_add_kwh: number;
   charge_time_hours: number;
   charge_cost_usd: number;
+  arrival_margin_min: number | null;
   route_distance_mi: number;
   route_drive_hours: number;
   total_hours: number;
@@ -80,6 +85,11 @@ export interface Assessment {
   truck_snapshot: Record<string, unknown>;
   load_snapshot: Record<string, unknown>;
   created_at: string;
+}
+
+export interface FleetResponse {
+  load_id: string;
+  items: Assessment[];
 }
 
 export interface ParamDoc {

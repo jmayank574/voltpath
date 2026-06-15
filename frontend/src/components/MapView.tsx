@@ -51,6 +51,12 @@ export function MapView({ token, assessment }: Props) {
     const map = mapRef.current;
     if (!map || !assessment) return;
 
+    const VERDICT_COLOR: Record<string, string> = {
+      feasible: "#12a36b",
+      feasible_with_charging: "#9a6a12",
+      infeasible: "#b3261e",
+    };
+
     const draw = () => {
       const geom = assessment.route_geometry;
       const coords = (geom?.coordinates ?? []) as [number, number][];
@@ -61,6 +67,9 @@ export function MapView({ token, assessment }: Props) {
           properties: {},
           geometry: { type: "LineString", coordinates: coords },
         });
+      }
+      if (map.getLayer("route-line")) {
+        map.setPaintProperty("route-line", "line-color", VERDICT_COLOR[assessment.verdict] ?? "#12a36b");
       }
 
       // Reset markers.
@@ -85,16 +94,17 @@ export function MapView({ token, assessment }: Props) {
 
       for (const c of assessment.chargers_used) {
         const el = document.createElement("div");
-        el.className = `map-charger-pin${c.picked ? " picked" : ""}`;
-        const label = `${c.name ?? c.network ?? "Charger"}${
+        el.className = "map-charger-pin";
+        el.textContent = String(c.order);
+        const label = `Stop ${c.order}: ${c.name ?? c.network ?? "Charger"}${
           c.max_power_kw ? ` · ${c.max_power_kw} kW` : ""
-        }${c.picked ? " · charge stop" : ""}`;
+        } · +${c.energy_added_kwh.toFixed(0)} kWh / ${Math.round(c.charge_minutes)} min`;
         const marker = new mapboxgl.Marker(el)
           .setLngLat([c.lon, c.lat])
-          .setPopup(new mapboxgl.Popup({ offset: 12 }).setText(label))
+          .setPopup(new mapboxgl.Popup({ offset: 14 }).setText(label))
           .addTo(map);
         markersRef.current.push(marker);
-        if (c.picked) bounds.extend([c.lon, c.lat]);
+        bounds.extend([c.lon, c.lat]);
       }
 
       if (!bounds.isEmpty()) {

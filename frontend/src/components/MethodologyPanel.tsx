@@ -16,6 +16,7 @@ const RANGE: Record<string, { min: number; max: number; step: number }> = {
   payload_coefficient_kwh_per_mi_per_ton: { min: 0, max: 0.1, step: 0.005 },
   charge_efficiency: { min: 0.7, max: 1.0, step: 0.01 },
   charge_soc_cap_pct: { min: 50, max: 100, step: 1 },
+  min_charger_power_kw: { min: 0, max: 400, step: 10 },
   energy_price_per_kwh_usd: { min: 0, max: 1, step: 0.01 },
 };
 
