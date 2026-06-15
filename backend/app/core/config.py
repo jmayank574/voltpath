@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,6 +18,17 @@ class Settings(BaseSettings):
     )
 
     database_url: str = "postgresql+psycopg://voltpath:voltpath@localhost:5432/voltpath"
+
+    @field_validator("database_url")
+    @classmethod
+    def _normalize_db_url(cls, v: str) -> str:
+        # Railway/Heroku hand out bare 'postgresql://'; pin it to the psycopg3
+        # driver SQLAlchemy expects, so the same URL works locally and in prod.
+        if v.startswith("postgresql://"):
+            return "postgresql+psycopg://" + v[len("postgresql://"):]
+        if v.startswith("postgres://"):
+            return "postgresql+psycopg://" + v[len("postgres://"):]
+        return v
 
     # External APIs (real data). Empty until the operator provisions them.
     nrel_api_key: str = ""
